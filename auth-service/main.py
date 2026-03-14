@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.core.config import settings
 from app.api.v1.endpoints import router as api_router
-from app.db.database import create_tables
+from migrate import run_migrations_on_startup
 
 
 @asynccontextmanager
@@ -12,9 +12,9 @@ async def lifespan(app: FastAPI):
     DynamoDB equivalent of 'manage.py migrate': checks if tables exist and
     creates them if they don't. No separate migration step needed.
     """
-    print("🚀 Starting up... checking / creating DynamoDB tables.")
-    create_tables()
-    print("✅ DynamoDB tables ready.")
+    print("🚀 Starting up — running DynamoDB migrations...")
+    run_migrations_on_startup()
+    print("✅ DynamoDB ready.")
     yield
     # (Optional) teardown logic can go here after the yield
     print("🛑 Shutting down.")
