@@ -1,22 +1,15 @@
+import sys
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.core.config import settings
 from app.api.v1.endpoints import router as api_router
-from migrate import run_migrations_on_startup
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Lifespan handler — runs once at startup before the server accepts requests.
-    DynamoDB equivalent of 'manage.py migrate': checks if tables exist and
-    creates them if they don't. No separate migration step needed.
-    """
-    print("🚀 Starting up — running DynamoDB migrations...")
-    run_migrations_on_startup()
-    print("✅ DynamoDB ready.")
+    """Lifespan handler — runs once at startup before the server accepts requests."""
+    print("🚀 Starting up.")
     yield
-    # (Optional) teardown logic can go here after the yield
     print("🛑 Shutting down.")
 
 
@@ -37,5 +30,24 @@ def read_root():
 
 
 if __name__ == "__main__":
+    if "--migrate-status" in sys.argv:
+        from app.db.database import get_dynamodb_client
+        from migrate import cmd_status
+
+        client = get_dynamodb_client()
+        cmd_status(client)
+        sys.exit(0)
+
+    if "--migrate" in sys.argv:
+        from app.db.database import get_dynamodb_client
+        from migrate import cmd_migrate
+        print("🚀 Running migrations...")
+        client = get_dynamodb_client()
+        cmd_migrate(client)
+        print("✅ Migrations completed.")
+        sys.exit(0)
+
+    print("🚀 Starting server...")
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    print("✅ Server started.")
