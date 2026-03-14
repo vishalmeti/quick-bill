@@ -1,0 +1,7 @@
+{
+  "venvPath": "auth-service",
+  "venv": "venv",
+  "extraPaths": [
+    "./auth-service"
+  ]
+}
