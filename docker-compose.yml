@@ -1,0 +1,29 @@
+services:
+  auth-service:
+    env_file:
+      - ./auth-service/.env
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: quick-bill-auth-service
+    ports:
+      - "8000:8000"
+    # All env vars (AWS_*, DYNAMODB_TABLE, SECRET_KEY) loaded from auth-service/.env
+    # Add 'environment:' block to override specific vars when needed
+    restart: unless-stopped
+    # Add depends_on when other services (e.g. DynamoDB Local) are added:
+    # depends_on:
+    #   - dynamodb-local
+
+  # Uncomment and add more microservices here as they are created:
+  #
+  # billing-service:
+  #   build:
+  #     context: ./billing-service
+  #     dockerfile: Dockerfile
+  #   container_name: quick-bill-billing-service
+  #   ports:
+  #     - "8001:8000"
+  #   env_file:
+  #     - ./billing-service/.env
+  #   restart: unless-stopped
